@@ -395,10 +395,12 @@ const loadPackages = async (page = 1) => {
     }
     const response = await packagesApi.list(params)
     const data = response.data
+    console.log('[PACKAGES] Réponse API:', { data, has_packages: !!data.packages, has_data: !!data.data })
     // L'API retourne {success: true, packages: [...], pagination: {...}} pour admin
     // ou {success: true, data: [...], pagination: {...}} pour partenaire
     packages.value = data.packages || data.data || []
     pagination.value = data.pagination || null
+    console.log('[PACKAGES] Packages chargés:', packages.value.length)
     
     // Calculer les statistiques
     calculateStats()

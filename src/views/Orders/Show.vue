@@ -302,6 +302,11 @@ const loadOrder = async () => {
   error.value = ''
   try {
     const response = await ordersApi.show(route.params.id)
+    console.log('[ORDER_SHOW] Réponse API complète:', response)
+    console.log('[ORDER_SHOW] response.data:', response.data)
+    console.log('[ORDER_SHOW] response.data.success:', response.data?.success)
+    console.log('[ORDER_SHOW] response.data.order:', response.data?.order)
+    console.log('[ORDER_SHOW] response.data.data:', response.data?.data)
     
     // Gérer différents formats de réponse
     let orderData = null
@@ -328,11 +333,20 @@ const loadOrder = async () => {
     }
     
     if (orderData) {
+      console.log('[ORDER_SHOW] Order data chargée:', orderData)
+      console.log('[ORDER_SHOW] Order ID:', orderData.id)
+      console.log('[ORDER_SHOW] Order status:', orderData.status)
+      console.log('[ORDER_SHOW] Order amount:', orderData.amount)
+      console.log('[ORDER_SHOW] Order email:', orderData.email)
       order.value = orderData
     } else {
+      console.error('[ORDER_SHOW] Aucune donnée order trouvée dans la réponse')
+      console.error('[ORDER_SHOW] Response data complète:', JSON.stringify(response.data, null, 2))
       error.value = response.data?.message || 'Aucune donnée de commande trouvée dans la réponse'
     }
   } catch (err) {
+    console.error('[ORDER_SHOW] Erreur:', err)
+    console.error('[ORDER_SHOW] Erreur response:', err.response)
     error.value = err.response?.data?.message || err.message || 'Erreur lors du chargement de la commande'
   } finally {
     loading.value = false

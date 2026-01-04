@@ -251,6 +251,7 @@ const saveProfile = async () => {
   saving.value = true
   try {
     // TODO: Implémenter l'API pour mettre à jour le profil
+    console.log('Sauvegarde profil:', form.value)
     // Simuler une sauvegarde
     await new Promise(resolve => setTimeout(resolve, 1000))
     userInfo.value = { ...userInfo.value, ...form.value }

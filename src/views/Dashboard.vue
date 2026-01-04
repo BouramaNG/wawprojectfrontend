@@ -365,19 +365,22 @@ onMounted(async () => {
   const userType = localStorage.getItem('auth_user_type') || 'admin'
   
   if (userType === 'partner') {
+    console.log('[DASHBOARD] Utilisateur partenaire détecté, chargement des infos partenaire')
     // Charger les informations du partenaire
     try {
       const user = authService.getCurrentUser()
       if (user) {
         partnerInfo.value = user
+        console.log('[DASHBOARD] Infos partenaire chargées', user)
       }
     } catch (error) {
-      // Erreur silencieuse
+      console.error('[DASHBOARD] Erreur chargement infos partenaire', error)
     }
     return
   }
   
   try {
+    console.log('[DASHBOARD] Chargement des stats admin')
     const response = await dashboard.stats()
     const data = response.data.data || response.data
     

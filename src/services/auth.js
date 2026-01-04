@@ -11,13 +11,27 @@ export const authService = {
    * Connexion utilisateur
    */
   async login(email, password) {
+    console.log('[AUTH_LOGIN] Début connexion', { email })
     try {
       const response = await api.post('/login', { email, password })
+      console.log('[AUTH_LOGIN] Réponse reçue', {
+        has_token: !!response.data.token,
+        has_user: !!response.data.user,
+        user_type: response.data.user_type,
+        response_keys: Object.keys(response.data),
+      })
       
       // Gérer les deux types d'utilisateurs (admin et partner)
       if (response.data.token && response.data.user) {
         const user = response.data.user
         const userType = response.data.user_type || 'admin' // 'admin' ou 'partner'
+        
+        console.log('[AUTH_LOGIN] Traitement utilisateur', {
+          user_type: userType,
+          user_id: user.id,
+          user_email: user.email,
+          user_role: user.role,
+        })
         
         // Pour les admins (User)
         if (userType === 'admin') {
@@ -48,6 +62,12 @@ export const authService = {
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
         localStorage.setItem('auth_user_type', userType) // Stocker le type pour référence
         
+        console.log('[AUTH_LOGIN] Connexion réussie', {
+          user_type: userType,
+          token_stored: !!localStorage.getItem(AUTH_TOKEN_KEY),
+          user_stored: !!localStorage.getItem(AUTH_USER_KEY),
+        })
+        
         return {
           success: true,
           user: user,
@@ -56,8 +76,14 @@ export const authService = {
         }
       }
       
+      console.error('[AUTH_LOGIN] Réponse invalide', response.data)
       throw new Error('Réponse invalide du serveur')
     } catch (error) {
+      console.error('[AUTH_LOGIN] Erreur', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      })
       const message = error.response?.data?.error || error.message || 'Erreur de connexion'
       return {
         success: false,
@@ -90,6 +116,7 @@ export const authService = {
       }
     } catch (error) {
       // Ignorer les erreurs de déconnexion serveur (token peut être déjà expiré)
+      console.log('Déconnexion serveur ignorée (token peut être expiré)')
     }
   },
 
@@ -128,6 +155,13 @@ export const authService = {
   async fetchCurrentUser() {
     try {
       const userType = localStorage.getItem('auth_user_type') || 'admin'
+      const token = localStorage.getItem(AUTH_TOKEN_KEY)
+      
+      console.log('[AUTH_FETCH_USER] Début récupération', {
+        user_type: userType,
+        has_token: !!token,
+        token_preview: token ? token.substring(0, 20) + '...' : null,
+      })
       
       // Utiliser le bon endpoint selon le type d'utilisateur
       let endpoint = '/me'
@@ -135,7 +169,14 @@ export const authService = {
         endpoint = '/partner-auth/me'
       }
       
+      console.log('[AUTH_FETCH_USER] Appel API', { endpoint })
       const response = await api.get(endpoint)
+      console.log('[AUTH_FETCH_USER] Réponse reçue', {
+        status: response.status,
+        has_data: !!response.data,
+        data_keys: response.data ? Object.keys(response.data) : [],
+        success: response.data?.success,
+      })
       
       // Gérer les deux formats de réponse
       let user = null
@@ -153,6 +194,13 @@ export const authService = {
         user = response.data
       }
       
+      console.log('[AUTH_FETCH_USER] User extrait', {
+        user_present: !!user,
+        user_id: user?.id,
+        user_email: user?.email,
+        user_role: user?.role,
+      })
+      
       if (user) {
         // S'assurer que le rôle est formaté correctement
         if (typeof user.role === 'string') {
@@ -163,17 +211,27 @@ export const authService = {
         user.user_type = userType
         
         localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
+        console.log('[AUTH_FETCH_USER] User stocké dans localStorage')
         return user
       }
       
+      console.warn('[AUTH_FETCH_USER] Aucun user trouvé dans la réponse')
       return null
     } catch (error) {
+      console.error('[AUTH_FETCH_USER] Erreur', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+      })
       // Pour les partenaires, ne pas déconnecter immédiatement en cas d'erreur 401
       // car le token Sanctum peut être valide mais le middleware peut échouer
       if (error.response?.status === 401) {
         const userType = localStorage.getItem('auth_user_type')
+        console.log('[AUTH_FETCH_USER] Erreur 401, user_type:', userType)
         if (userType !== 'partner') {
           // Déconnecter seulement pour les admins
+          console.log('[AUTH_FETCH_USER] Déconnexion admin suite à 401')
           this.logout()
         }
       }

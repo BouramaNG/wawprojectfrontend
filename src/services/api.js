@@ -35,19 +35,29 @@ api.interceptors.response.use(
       const userType = localStorage.getItem('auth_user_type') || 'admin'
       const requestUrl = error.config?.url || ''
       
+      console.log('[API_INTERCEPTOR] Erreur 401 détectée', {
+        user_type: userType,
+        url: requestUrl,
+        is_admin_route: requestUrl.includes('/admin/'),
+        is_change_password: requestUrl.includes('/change-password'),
+      })
+      
       // Ne pas rediriger pour les erreurs de changement de mot de passe
       // (mot de passe incorrect, etc.) - laisser le composant gérer l'erreur
       if (requestUrl.includes('/change-password')) {
+        console.log('[API_INTERCEPTOR] Erreur 401 sur changement de mot de passe, ne pas rediriger')
         return Promise.reject(error)
       }
       
       // Pour les partenaires, ne pas déconnecter si c'est une route admin
       // car c'est normal qu'ils n'y aient pas accès
       if (userType === 'partner' && requestUrl.includes('/admin/')) {
+        console.log('[API_INTERCEPTOR] Partenaire tentant d\'accéder à une route admin, ne pas déconnecter')
         return Promise.reject(error)
       }
       
       // Pour les autres cas (token invalide, expiré, etc.), déconnecter
+      console.log('[API_INTERCEPTOR] Déconnexion suite à 401')
       await authService.logout()
       
       // Rediriger vers login si on n'est pas déjà sur la page login

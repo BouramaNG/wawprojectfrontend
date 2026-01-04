@@ -495,6 +495,7 @@ const savePreferences = async () => {
 
 const toggleApiKey = async (keyId, isActive) => {
   // TODO: Implémenter l'API pour activer/désactiver une clé
+  console.log('Toggle API key:', keyId, isActive)
   showInfo('Fonctionnalité à implémenter: contactez votre administrateur')
 }
 
@@ -508,6 +509,7 @@ const deleteApiKey = async (keyId) => {
       cancelText: 'Annuler',
       onConfirm: () => {
         // TODO: Implémenter l'API pour supprimer une clé
+        console.log('Delete API key:', keyId)
         showInfo('Fonctionnalité à implémenter: contactez votre administrateur')
       },
     }

@@ -6,6 +6,12 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/documentation-partenaire',
+      name: 'documentation-partenaire',
+      component: () => import('@/views/Partners/ApiDocumentation.vue'),
+      // Route publique, pas de guard d'authentification
+    },
+    {
       path: '/login',
       name: 'login',
       component: () => import('@/views/Auth/Login.vue'),

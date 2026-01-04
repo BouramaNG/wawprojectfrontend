@@ -131,32 +131,62 @@ const handleLogin = async () => {
   error.value = ''
   loading.value = true
 
+  console.log('[LOGIN_VUE] Début connexion', { email: form.value.email })
+
   try {
     const result = await authService.login(form.value.email, form.value.password)
+    console.log('[LOGIN_VUE] Résultat login', {
+      success: result.success,
+      user_type: result.user_type,
+      has_user: !!result.user,
+      error: result.error,
+    })
 
     if (result.success) {
       // Stocker le type d'utilisateur immédiatement
       if (result.user_type) {
         localStorage.setItem('auth_user_type', result.user_type)
+        console.log('[LOGIN_VUE] user_type stocké:', result.user_type)
       }
       
       // Pour les utilisateurs partenaires, ne pas appeler fetchCurrentUser immédiatement
       // car ils utilisent un endpoint différent et le token Sanctum
       if (result.user_type === 'partner') {
+        console.log('[LOGIN_VUE] ✅ Utilisateur partenaire connecté:', {
+          id: result.user.id,
+          email: result.user.email,
+          role: result.user.role,
+          user_type: 'partner',
+        })
+        console.log('[LOGIN_VUE] Redirection vers dashboard (partenaire)')
         // Rediriger directement pour les partenaires
         await new Promise(resolve => setTimeout(resolve, 100))
         router.push('/')
       } else {
         // Pour les admins, récupérer les infos complètes
-        await authService.fetchCurrentUser()
+        console.log('[LOGIN_VUE] Appel fetchCurrentUser pour admin')
+        const user = await authService.fetchCurrentUser()
+        console.log('[LOGIN_VUE] User récupéré', { user_present: !!user })
+        
+        // Vérifier que le rôle est bien chargé
+        if (user) {
+          const roleName = user.role?.name || user.role || 'non défini'
+          console.log('[LOGIN_VUE] ✅ Utilisateur admin connecté:', {
+            id: user.id,
+            email: user.email,
+            role: roleName,
+          })
+        }
         
         // Petit délai pour s'assurer que tout est stocké
         await new Promise(resolve => setTimeout(resolve, 100))
         
         // Rediriger vers le dashboard
+        console.log('[LOGIN_VUE] Redirection vers dashboard (admin)')
         router.push('/')
       }
     } else {
+      console.error('[LOGIN_VUE] Échec connexion', result.error)
       error.value = result.error || 'Erreur de connexion. Vérifiez vos identifiants.'
     }
   } catch (err) {

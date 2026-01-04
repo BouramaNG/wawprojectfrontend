@@ -530,6 +530,8 @@ async function createOrder() {
     );
 
     if (response.data.success) {
+      console.log('Commande créée:', response.data.data.order_id);
+      console.log('QR Code:', response.data.data.esim.qr_code_url);
     }
   } catch (error) {
     console.error('Erreur:', error.response?.data || error.message);
