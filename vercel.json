@@ -1,10 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/wawapi/:path*",
-      "destination": "http://196.250.202.39/wawapi/:path*"
-    },
-    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
