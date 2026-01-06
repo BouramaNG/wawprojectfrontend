@@ -1,8 +1,23 @@
 import axios from 'axios'
 import { authService } from './auth'
 
+// Construire l'URL de base - si VITE_API_URL contient déjà /api, ne pas l'ajouter
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  // Si l'URL se termine déjà par /api, l'utiliser telle quelle
+  if (envUrl.endsWith('/api')) {
+    return envUrl
+  }
+  // Si l'URL contient déjà /api quelque part, l'utiliser telle quelle
+  if (envUrl.includes('/api')) {
+    return envUrl
+  }
+  // Sinon, ajouter /api seulement si ce n'est pas déjà présent
+  return envUrl.endsWith('/') ? `${envUrl}api` : `${envUrl}/api`
+}
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
