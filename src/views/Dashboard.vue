@@ -365,22 +365,19 @@ onMounted(async () => {
   const userType = localStorage.getItem('auth_user_type') || 'admin'
   
   if (userType === 'partner') {
-    console.log('[DASHBOARD] Utilisateur partenaire détecté, chargement des infos partenaire')
     // Charger les informations du partenaire
     try {
       const user = authService.getCurrentUser()
       if (user) {
         partnerInfo.value = user
-        console.log('[DASHBOARD] Infos partenaire chargées', user)
       }
     } catch (error) {
-      console.error('[DASHBOARD] Erreur chargement infos partenaire', error)
+      // Erreur silencieuse
     }
     return
   }
   
   try {
-    console.log('[DASHBOARD] Chargement des stats admin')
     const response = await dashboard.stats()
     const data = response.data.data || response.data
     
@@ -408,11 +405,8 @@ onMounted(async () => {
       loadingActivities.value = false
     }
   } catch (error) {
-    console.error('[DASHBOARD] Erreur chargement stats:', error)
-    
     // Si erreur 403 (permission refusée), afficher un message approprié
     if (error.response?.status === 403) {
-      console.warn('[DASHBOARD] Accès refusé - permission insuffisante')
       // Afficher un message d'information plutôt qu'une erreur
       // Les valeurs par défaut seront affichées
     }

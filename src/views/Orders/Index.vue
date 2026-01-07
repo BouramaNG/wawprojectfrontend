@@ -328,15 +328,12 @@ const loadOrders = async (page = 1) => {
       params.search = searchQuery.value.trim()
     }
     const response = await ordersApi.list(params)
-    console.log('[ORDERS] Réponse API:', { data: response.data, has_data: !!response.data.data })
     // L'API retourne {success: true, data: [...], pagination: {...}} pour partenaire
     // ou {success: true, orders: [...], pagination: {...}} pour admin
     orders.value = response.data.data || response.data.orders || response.data || []
     pagination.value = response.data.pagination || null
-    console.log('[ORDERS] Commandes chargées:', orders.value.length)
     calculateStats()
   } catch (error) {
-    console.error('Erreur chargement commandes:', error)
   } finally {
     loading.value = false
   }

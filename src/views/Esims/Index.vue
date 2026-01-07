@@ -470,7 +470,6 @@ const loadEsims = async (page = 1) => {
     const params = { page, ...filters.value }
     const response = await esimsApi.list(params)
     const data = response.data
-    console.log('[ESIMS] Réponse API:', { data, has_esims: !!data.esims, has_data: !!data.data })
     // L'API retourne {success: true, esims: [...], stats: {...}} pour admin
     // ou {success: true, data: [...], pagination: {...}} pour partenaire
     esims.value = data.esims || data.data || []
@@ -484,13 +483,11 @@ const loadEsims = async (page = 1) => {
       total: esims.value.length,
       last_page: 1,
     }
-    console.log('[ESIMS] eSIMs chargés:', esims.value.length)
     // Charger les stats si elles ne sont pas déjà chargées
     if (!stats.value) {
       await loadStats()
     }
   } catch (error) {
-    console.error('Erreur chargement eSIMs:', error)
     esims.value = []
   } finally {
     loading.value = false
@@ -514,7 +511,6 @@ const loadStats = async () => {
       }
     }
   } catch (error) {
-    console.error('Erreur chargement stats:', error)
     // En cas d'erreur, utiliser les stats calculées depuis la liste
     stats.value = {
       total: pagination.value?.total || esims.value.length,
@@ -629,7 +625,7 @@ const copyToClipboard = async (text) => {
     await navigator.clipboard.writeText(text)
     success('Copié dans le presse-papiers !')
   } catch (err) {
-    console.error('Erreur copie:', err)
+    // Erreur silencieuse lors de la copie
   }
 }
 
